@@ -3,9 +3,6 @@
 ### 1.タスクの取得
 Path: /api/todo/tasks  
 Method: GET  
-Request Header:  
-'Content-Type: application/json'<br>
-Request Body:'{}'  
 Responce Body:  
  <!-- 11行目からのコード    -->
  ``` {  
@@ -81,10 +78,7 @@ Response Header:
 
 ### 3.特定のタスク取得  
 Path:- '/api/todo/tasks/{task_id}'   
-Method: GET  
-Request Header: 
-'Content-Type: application/json'<br>
-Request Body:'{}'  
+Method: GET   
 Responce Body:(task_idが1のデータをGETする場合)  
 <!-- 91行目からのコード -->
  ```
@@ -155,10 +149,7 @@ Response Header:
 
 ### 5.タスク削除  
 Path:- '/api/todo/tasks/{task_id}'   
-Method: DELETE<br>
-Request Header: 
-'Content-Type: application/json'  
-Request Body:'{}'<br>
+Method: DELETE<br> 
 Responce Body:(task_idが3のデータをDELETEする場合)
 <!-- 165行目からのコード -->
 ```
