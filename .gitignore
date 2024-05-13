@@ -1,0 +1,6 @@
+<<<<<<< HEAD
+env
+=======
+.env
+>>>>>>> origin/fastapi-setup
+__pycache__
