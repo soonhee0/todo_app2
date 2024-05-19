@@ -29,18 +29,18 @@ Base = declarative_base()
 # テーブルを表すクラスを定義する。
 class Status(Base):
     __tablename__ = "status"
-    id=Mapped[int]=mapped_column(Integer,primary_key=True,autoincrement=True)
-    display_name=Mapped[str] =mapped_column(String,nullable=False)
+    id=mapped_column(Integer, primary_key=True, autoincrement=True)
+    display_name=mapped_column(String,nullable=False)
      
      # ... mapped_column() mappings taskテーブルとのリレーションシップ
     tasks: Mapped[List["Task"]] = relationship("Task",back_populates="status")
 
 class Task(Base):
     __tablename__ = "task"
-    id=Mapped[int]=mapped_column(Integer,primary_key=True,autoincrement=True)
-    title:Mapped[str]=mapped_column(String(30), nullable=False)
+    id=mapped_column(Integer,primary_key=True,autoincrement=True)
+    title=mapped_column(String(30), nullable=False)
     deadline:Mapped[Optional[Date]]=mapped_column(Date, nullable=True)
-    status_id= Mapped[int]=mapped_column(Integer,ForeignKey('status.id'),autoincrement=True)
+    status_id=mapped_column(Integer,ForeignKey('status.id'))
    
      # ... mapped_column() mappings Pythonクラス間のリレーションを定義し、オブジェクト間の関連性を扱いやすくする
 
