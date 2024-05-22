@@ -1,16 +1,12 @@
+# サードパーティライブラリ
 from fastapi import FastAPI
-from .settings import engine, Base 
+# ローカルモジュール
+from .settings import engine, Base,SessionLocal
+
 app = FastAPI()
-
-@app.get("/")
-def read_root():
-    return {"message": "Hello, World!"}
-
-# FastAPIのStartupイベントでテーブルを作成する
-@app.on_event("startup")
-def startup_event():
-    # テーブルを作成
-    Base.metadata.create_all(bind=engine)
+# エンジンにベースクラスを関連付ける。 定義されたテーブルをデータベースに作成する
+# metadataとは、データベースの様々な情報を保持しているオブジェクト
+Base.metadata.create_all(bind=engine)
 
 # get_db は、SQLAlchemyのセッションを取得し、使用後に確実にクローズするためのジェネレータ関数
 # データベースとの接続を取得する依存関係　関数やクラスが必要とする依存オブジェクトを外部から提供する
