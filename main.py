@@ -35,7 +35,6 @@ def read_root():
 @app.get("/api/todo/tasks")
 # Depends(get_db)を指定することで、パス関数を実行する前にget_dbを実行し、dbインスタンスを取得する 依存性注入
 
-
 def get_tasks(db: Session = Depends(get_db)):
     #  query()メソッドでデータを選択できる。all()メソッドで全てを選択する
 
@@ -43,6 +42,12 @@ def get_tasks(db: Session = Depends(get_db)):
     print(all_tasks)
     return all_tasks
 
+# 特定のタスク取得  
+@app.get("/api/todo/tasks/{id}")
+def get_task(id:int, db:Session=Depends(get_db)):
+    # Task.idはTaskテーブルのidカラムでidはパスパラメータとして渡されたid
+    # first()でフィルタリングされた中で最初の値を指す
+    particular_task = db.query(Task).filter(Task.id==id).first()
 
 # Pythonスクリプトが直接実行された場合
 if __name__ == "__main__":
