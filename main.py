@@ -43,11 +43,11 @@ def get_tasks(db: Session = Depends(get_db)):
     return all_tasks
 
 # 特定のタスク取得  
-@app.get("/api/todo/tasks/{id}")
-def get_task(id:int, db:Session=Depends(get_db)):
+@app.get("/api/todo/tasks/{task_id}")
+def get_task(task_id:int, db:Session=Depends(get_db)):
     # Task.idはTaskテーブルのidカラムでidはパスパラメータとして渡されたid
     # first()でフィルタリングされた中で最初の値を指す
-    particular_task = db.query(Task).filter(Task.id==id).first()
+    particular_task = db.query(Task).filter(Task.id==task_id).first()
 
 # Pythonスクリプトが直接実行された場合
 if __name__ == "__main__":
