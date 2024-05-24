@@ -31,7 +31,7 @@ class Status(Base):
     id = mapped_column(Integer, primary_key = True, autoincrement = True)
     display_name = mapped_column(String,nullable = False)
     # TaskテーブルからStatusを参照できる。多対一の関係を表す
-    tasks: Mapped[List["Task"]] = relationship("Task",backref = "status")
+    tasks: Mapped[List["Task"]] = relationship("Task",back_populates = "status")
     
 class Task(Base):
     __tablename__ = "task"
@@ -39,7 +39,7 @@ class Task(Base):
     title = mapped_column(String(30), nullable = False)
     deadline:Mapped[Optional[Date]] = mapped_column(Date, nullable = True)
     status_id = mapped_column(Integer,ForeignKey('status.id'))
-   
+    status: Mapped[Status] = relationship("Status",back_populates = "tasks")
 # テーブルの存在を確認する
 inspector = inspect(engine)
 tables = inspector.get_table_names()
