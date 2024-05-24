@@ -41,6 +41,8 @@ def get_tasks(db: Session = Depends(get_db)):
 
     all_tasks = db.query(Task).all()
     print(all_tasks)
+    if not all_tasks:
+        raise HTTPException(status_code=404, detail="No tasks found")
     return all_tasks
 
 
@@ -48,7 +50,7 @@ def get_tasks(db: Session = Depends(get_db)):
 @app.get("/api/todo/tasks/{task_id}")
 def get_task(task_id: int, db: Session = Depends(get_db)):
 
-    # Task.idはTaskテーブルのidカラムでidはパスパラメータとして渡されたid
+    # Task.idはTaskテーブルのidカラムでtask_idはパスパラメータとして渡されたid
     # first()でフィルタリングされた中で最初の値を指す
     particular_task = db.query(Task).filter(Task.id == task_id).first()
     if particular_task is None:
