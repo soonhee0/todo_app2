@@ -38,11 +38,8 @@ def read_root():
 
 def get_tasks(db: Session = Depends(get_db)):
     #  query()メソッドでデータを選択できる。all()メソッドで全てを選択する
-
     all_tasks = db.query(Task).all()
     print(all_tasks)
-    if not all_tasks:
-        raise HTTPException(status_code=404, detail="No tasks found")
     return all_tasks
 
 
