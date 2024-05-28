@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from pathlib import Path
 import sys
-import json
+
 
 # importしたい親の親のパッケージをモジュール検索に追加する
 sys.path.append(str(Path(__file__).resolve().parent.parent))
