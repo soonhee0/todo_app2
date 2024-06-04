@@ -1,3 +1,4 @@
+# FastAPIを使用してウェブAPIエンドポイントをテストする
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from pathlib import Path

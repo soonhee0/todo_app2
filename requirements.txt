@@ -2,11 +2,17 @@
 fastapi==0.111.0
 pre-commit==3.7.1
 psycopg2-binary==2.9.9
+# pytest-postgresqlをインストールするためにはpsycog3が必要
+# psycopg2とpsycopg3は共存可能
+psycopg3==3.1.19 
+psycopg3-binary==3.1.19
 pydantic==2.7.1
 pytest==8.2.1
+pytest-postgresql==6.0.0
 python-dotenv==1.0.1
 requests==2.32.2
 SQLAlchemy==2.0.30
 uvicorn==0.29.0
+
 
 
