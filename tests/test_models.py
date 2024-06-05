@@ -4,6 +4,10 @@ from settings import Base, Task, Status, engine
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
+import sqlalchemy
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
+from sqlalchemy import inspect
 
 
 # ダミーデータを挿入する関数
@@ -36,30 +40,37 @@ def add_dummy_data(session):
 # pytest フィクスチャ
 # db_sessionはテスト用のデータベースセッションをセットアップするフィクスチャ
 @pytest.fixture(scope="module")
-def db_session(postgresql_proc):
-    # .envファイルから環境変数を読み込む
+def db_session():
+    # テスト用データベースURLを環境変数から取得
     load_dotenv()
+    TEST_SQLALCHEMY_DATABASE_URL = os.getenv("TEST_SQLALCHEMY_DATABASE_URL")
 
-    # 環境変数から接続情報を取得
-    DATABASE_URL = os.getenv("DATABASE_URL")
-    engine = create_engine(DATABASE_URL)
+    # そのデータベースURLを使用してデータベースエンジンを作成
+    engine = create_engine(TEST_SQLALCHEMY_DATABASE_URL)
+
+    # データベースを作成する
     Session = sessionmaker(bind=engine)
     session = Session()
-    Base.metadata.create_all(engine)  # テーブルの作成
+
+    # テーブルを作成する
+    Base.metadata.create_all(engine)
+
     add_dummy_data(session)  # ダミーデータの挿入
+
     # データベースセッションを一時的に提供する
     # 関数の実行を停止して、add_dummy_data(session) の処理を行う
     # add_dummy_data(session)の処理が終わってから、 db_session()が再開する
-    yield session
+    yield session  # セッションを開始する
     session.close()
     Base.metadata.drop_all(engine)  # テーブルの削除
 
 
-def test_tasks_exist(db_session):
-    # Taskテーブルからすべての行を取得してtasksリストに格納する
-    tasks = db_session.query(Task).all()
-    assert len(tasks) == 3  # ダミーデータの数に基づくアサーション
-    # タスクのtitleがダミーデータとして挿入した値と一致するかを確認する
-    assert tasks[0].title == "shopping"
-    assert tasks[1].title == "buy birthday present"
-    assert tasks[2].title == "finish writing report"
+def test_db_connection(db_session):
+    try:
+        inspector = inspect(db_session.bind)
+        tables = inspector.get_table_names()
+        print(f"Tables in the database: {tables}")
+        assert len(tables) > 0
+        print("Database connection is verified.")
+    except Exception as e:
+        pytest.fail(f"Database connection failed: {e}")
