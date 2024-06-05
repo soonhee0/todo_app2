@@ -1,13 +1,9 @@
 import pytest
 import os
-from settings import Base, Task, Status, engine
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, inspect
+from sqlalchemy.orm import sessionmaker, declarative_base
 from dotenv import load_dotenv
-import sqlalchemy
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import declarative_base
-from sqlalchemy import inspect
+from settings import Base, Task, Status
 
 
 # ダミーデータを挿入する関数
@@ -24,6 +20,7 @@ def add_dummy_data(session):
 
     # セッション内のすべての変更をデータベースに保存する
     session.commit()
+
     tasks = [
         Task(id="1", title="shopping", deadline="2024-06-30", status_id="0"),
         Task(
@@ -50,9 +47,15 @@ def db_session():
 
     # データベースを作成する
     Session = sessionmaker(bind=engine)
-    session = Session()
 
-    # テーブルを作成する
+    # セッションのcommitメソッドをオーバーライド（親クラスからcommitメソッドを継承する）
+    class TestSession(Session):
+        def commit(self):
+            pass  # 実際には何も行わない
+
+    session = TestSession()
+
+    # テーブルを自動で作成する
     Base.metadata.create_all(engine)
 
     add_dummy_data(session)  # ダミーデータの挿入
