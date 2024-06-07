@@ -41,7 +41,9 @@ def add_dummy_data(session):
 # class CustomSessionを定義する テストのセッション
 class CustomSession(Session):
     def commit(self):
+        # flushされるだけでデータベースには書き込みされない
         self.flush()
+        # セッション内を期限切れにする　次にインスタンスにアクセスするときはデータベースから読み込みされる
         self.expire_all()
 
 
@@ -68,8 +70,14 @@ def db_session():
     add_dummy_data(session)  # ダミーデータの挿入
     # データベースセッションを一時的に提供する
     yield session  # セッションを開始する
+
+    # セッションをロールバック：未コミットの処理を元に戻す
+    session.rollback()
     session.close()
-    Base.metadata.drop_all(engine)  # テーブルの削除
+
+    # テーブルの削除と破棄
+    Base.metadata.drop_all(engine)
+    engine.dispose()
 
 
 def test_db_connection(db_session):
