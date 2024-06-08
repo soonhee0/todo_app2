@@ -89,3 +89,27 @@ def test_db_connection(db_session):
         print("Database connection is verified.")
     except Exception as e:
         pytest.fail(f"Database connection failed: {e}")
+
+
+def test_get_all_tasks(db_session):
+    # データベースからデータを取得する
+    tasks = db_session.query(Task).order_by(Task.id).all()
+    for task in tasks:
+        assert task.id is not None, "ID should not be None"
+        assert task.title is not None, "Title should not be None"
+        assert task.deadline is not None, "Deadline should not be None"
+        assert task.status_id is not None, "Status ID should not be None"
+        print(task.id, task.title, task.deadline, task.status_id)
+
+
+# id==1のテーブルデータを取得する
+def test_get_task(db_session):
+    task_id = 1
+    # task_idはパスパラメータで渡されるid
+    tasks = db_session.query(Task).filter(Task.id == task_id).all()
+    for task in tasks:
+        assert task.id is not None, "ID should not be None"
+        assert task.title is not None, "Title should not be None"
+        assert task.deadline is not None, "Deadline should not be None"
+        assert task.status_id is not None, "Status ID should not be None"
+        print(task.id, task.title, task.deadline, task.status_id)
