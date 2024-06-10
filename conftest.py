@@ -1,12 +1,13 @@
 import pytest
 import os
 from sqlalchemy import create_engine, inspect
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 from settings import Base, Task, Status
+from settings import Base
+from main import app, get_db
 from sqlalchemy.orm import Session
 
-# テスト用データベースURLを環境変数から取得
 load_dotenv()
 
 
@@ -26,14 +27,11 @@ def add_dummy_data(session):
     session.commit()
 
     tasks = [
-        Task(id="1", title="shopping", deadline="2024-06-30", status_id="0"),
-        Task(
-            id="2", title="buy birthday present", deadline="2024-06-30", status_id="1"
-        ),
-        Task(
-            id="3", title="finish writing report", deadline="2022-07-01", status_id="1"
-        ),
+        Task(id=1, title="shopping", deadline="2024-06-30", status_id=0),
+        Task(id=2, title="buy birthday present", deadline="2024-06-30", status_id=1),
+        Task(id=3, title="finish writing report", deadline="2024-07-01", status_id=1),
     ]
+
     session.add_all(tasks)
     session.commit()
 
@@ -47,8 +45,7 @@ class CustomSession(Session):
         self.expire_all()
 
 
-# pytest フィクスチャ
-# db_sessionはテスト用のデータベースセッションをセットアップするフィクスチャ
+# データベース接続とテストデータの挿入を行うフィクスチャを定義する
 @pytest.fixture(scope="module")
 def db_session():
     TEST_SQLALCHEMY_DATABASE_URL = os.getenv("TEST_SQLALCHEMY_DATABASE_URL")
@@ -80,12 +77,14 @@ def db_session():
     engine.dispose()
 
 
-def test_db_connection(db_session):
-    try:
-        inspector = inspect(db_session.bind)
-        tables = inspector.get_table_names()
-        print(f"Tables in the database: {tables}")
-        assert len(tables) > 0
-        print("Database connection is verified.")
-    except Exception as e:
-        pytest.fail(f"Database connection failed: {e}")
+@pytest.fixture(autouse=True)
+def override_get_db(db_session):
+    # 内部関数_override_get_dbがデータベースセッションを提供
+    def _override_get_db():
+        try:
+            yield db_session
+        finally:
+            db_session.close()
+
+    # 依存関係を割り当てる
+    app.dependency_overrides[get_db] = _override_get_db
