@@ -39,13 +39,12 @@ def add_dummy_data(session):
 # class CustomSessionを定義する テストのセッション
 class CustomSession(Session):
     def commit(self):
-        # flushされるだけでデータベースには書き込みされない
+        # flushされる（セッション内の変更がデータベースに反映される）だけでデータベースには書き込みされない
         self.flush()
         # セッション内を期限切れにする　次にインスタンスにアクセスするときはデータベースから読み込みされる
         self.expire_all()
 
 
-# データベース接続とテストデータの挿入を行うフィクスチャを定義する
 @pytest.fixture(scope="module")
 def db_session():
     TEST_SQLALCHEMY_DATABASE_URL = os.getenv("TEST_SQLALCHEMY_DATABASE_URL")
@@ -56,7 +55,7 @@ def db_session():
     # テーブルを自動で作成する
     Base.metadata.create_all(engine)
 
-    # Session factoryの生成
+    # Session factoryの生成　SessionLocalクラスのインスタンスはどれもデータベースセッション
     SessionLocal = sessionmaker(
         class_=CustomSession, autocommit=False, autoflush=False, bind=engine
     )
@@ -67,7 +66,7 @@ def db_session():
     add_dummy_data(session)  # ダミーデータの挿入
     # データベースセッションを一時的に提供する
     yield session  # セッションを開始する
-
+    # モジュール内の全てのテストが実行された後、以下の処理が実行される
     # セッションをロールバック：未コミットの処理を元に戻す
     session.rollback()
     session.close()
@@ -81,10 +80,12 @@ def db_session():
 def override_get_db(db_session):
     # 内部関数_override_get_dbがデータベースセッションを提供
     def _override_get_db():
-        try:
-            yield db_session
-        finally:
-            db_session.close()
+        # try:
+        yield db_session
+
+    # finally:
+    #     db_session.close()
 
     # 依存関係を割り当てる
+
     app.dependency_overrides[get_db] = _override_get_db
