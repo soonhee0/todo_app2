@@ -65,7 +65,8 @@ def db_session():
 
     add_dummy_data(session)  # ダミーデータの挿入
     # データベースセッションを一時的に提供する
-    yield session  # セッションを開始する
+    # db_sessionフィクスチャがテストで使用されるためのセッションインスタンスを提供する
+    yield session
     # モジュール内の全てのテストが実行された後、以下の処理が実行される
     # セッションをロールバック：未コミットの処理を元に戻す
     session.rollback()

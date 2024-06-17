@@ -1,7 +1,10 @@
 # サードパーティライブラリ
 from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 from typing import List
+from settings import SessionLocal
+
 
 # ローカルモジュール
 from settings import engine, Base, SessionLocal, Task
@@ -21,6 +24,8 @@ def get_db():
     try:
         # セッションオブジェクトを呼び出しもと（ged_db関数を呼び出している関数）に返す　この時関数の実行は一時停止する
         yield db
+    except OperationalError:
+        raise HTTPException(status_code=500, detail="Could not connect to the database")
     finally:
         # 呼び出し元の処理が終わるとsessionが確実に閉じられる
         db.close()
@@ -40,16 +45,21 @@ def get_tasks(db: Session = Depends(get_db)):
     #  query()メソッドでデータを選択できる。all()メソッドで全てを選択する
     all_tasks = db.query(Task).all()
     print(all_tasks)
+
     return all_tasks
 
 
 # 特定のタスク取得
 @app.get("/api/todo/tasks/{task_id}")
 def get_task(task_id: int, db: Session = Depends(get_db)):
-
+    if task_id < 0:
+        raise HTTPException(
+            status_code=400, detail="Task ID must be a non-negative integer"
+        )
     # Task.idはTaskテーブルのidカラムでtask_idはパスパラメータとして渡されたid
     # first()でフィルタリングされた中で最初の値を指す
     particular_task = db.query(Task).filter(Task.id == task_id).first()
+
     if particular_task is None:
         raise HTTPException(status_code=404, detail="Task not found")
     return particular_task
