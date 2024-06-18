@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 from settings import SessionLocal
 from sqlalchemy.exc import OperationalError
-from main import app, SessionLocal
+from main import app, SessionLocal, get_db
 from unittest.mock import Mock, patch
 
 # 指定された対象をモックに置き換えるための関数
@@ -55,7 +55,7 @@ def test_read_tasks_with_data(db_session):
 
 # 異常系のテスト
 # 不正なパラメータ
-# task_idが負の値の場合にエラーを発声させる
+# task_idが負の値の場合にエラーを発生させる
 def test_read_tasks_with_invalid_id():
     response = client.get("/api/todo/tasks/-1")
     assert response.status_code == 400
@@ -73,9 +73,12 @@ def test_get_task_nonexistent_id():
 # DBサーバーが応答不可　接続を失敗した場合のエラーハンドリングをテスト
 def test_db_connection_failure(monkeypatch):
 
-    def mock_session(*args, **kwargs):
+    def mock_session():
         # OperationalErrorの引数（エラーメッセージ、エラーコード、追加情報）
         raise OperationalError("mock", "mock", "mock")
+
+    # get_dbで例外を発生させる
+    app.dependency_overrides[get_db] = mock_session
 
     # SessionLocalが呼び出されるたびにmock_sessionが実行される
     monkeypatch.setattr("settings.SessionLocal", mock_session)

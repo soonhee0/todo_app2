@@ -1,5 +1,7 @@
 # サードパーティライブラリ
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Request
+from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 from typing import List
@@ -20,6 +22,7 @@ Base.metadata.create_all(bind=engine)
 def get_db():
     # 新しいデータベースセッションを作成し、変数dbに割り当てる。
     # このセッションはデータベースへの接続と操作を管理している
+    # インスタンス化
     db = SessionLocal()
     try:
         # セッションオブジェクトを呼び出しもと（ged_db関数を呼び出している関数）に返す　この時関数の実行は一時停止する
@@ -51,6 +54,7 @@ def get_tasks(db: Session = Depends(get_db)):
 
 # 特定のタスク取得
 @app.get("/api/todo/tasks/{task_id}")
+# get_db 関数を呼び出し、その戻り値を db パラメータに設定する
 def get_task(task_id: int, db: Session = Depends(get_db)):
     if task_id < 0:
         raise HTTPException(
@@ -63,6 +67,28 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
     if particular_task is None:
         raise HTTPException(status_code=404, detail="Task not found")
     return particular_task
+
+
+@app.exception_handler(StarletteHTTPException)
+# request オブジェクトは現在のHTTPリクエストを表す
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    if exc.status_code == 404:
+        return JSONResponse(status_code=404, content={"detail": "Task not found"})
+    elif exc.status_code == 400:
+
+        return JSONResponse(
+            status_code=400,
+            content={"detail": "Task ID must be a non-negative integer"},
+        )
+    else:
+        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+
+@app.exception_handler(OperationalError)
+async def operational_error_handler(request, exc: OperationalError):
+    return JSONResponse(
+        status_code=500, content={"detail": "Could not connect to the database"}
+    )
 
 
 # Pythonスクリプトが直接実行された場合
