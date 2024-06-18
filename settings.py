@@ -21,6 +21,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(DATABASE_URL)
 
 print(f"DATABASE_URL: {DATABASE_URL}")
+# セッションファクトリ。各リクエストごとに新しいセッションを生成してデータベース操作する
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 

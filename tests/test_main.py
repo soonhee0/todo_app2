@@ -80,8 +80,6 @@ def test_db_connection_failure(monkeypatch):
     # get_dbで例外を発生させる
     app.dependency_overrides[get_db] = mock_session
 
-    # SessionLocalが呼び出されるたびにmock_sessionが実行される
-    monkeypatch.setattr("settings.SessionLocal", mock_session)
     # データベース接続の失敗をシミュレーションする
     response = client.get("/api/todo/tasks")
 
