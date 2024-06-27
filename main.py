@@ -5,7 +5,6 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 from typing import List
-from settings import SessionLocal
 
 
 # ローカルモジュール
@@ -71,22 +70,15 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
 
 # タスクの作成
 @app.post("/api/todo/tasks")
-# リクエストボディを受け取り、 taskがpydanticモデルTaskのインスタンスとして割り当てられる
+# リクエストボディを受け取り、 引数taskとしてpydanticモデルのTaskインスタンスが割り当てられる
 def create_task(task: Task, db: Session = Depends(get_db)):
 
-    # データベースに保存するためのSQLAlchemyTaskモデルのインスタンスとしてdb_task を作成
-    db_task = Task(
-        id=id.task,
-        title=task.title,
-        deadline=task.deadline,
-        status_id=task.status_id,
-    )
-    db.add(db_task)
+    db.add(Task)
     db.commit()
-    # 最新のデータベースの内容をdb_taskオブジェクトに反映する
-    db.refresh(db_task)
-    print(db_task)
-    return db_task
+    # 最新のデータベースの内容をTaskインスタンスに反映する
+    db.refresh(Task)
+    print(Task)
+    return Task
 
 
 @app.exception_handler(StarletteHTTPException)
