@@ -44,7 +44,7 @@ def read_root():
 # Depends(get_db)を指定することで、パス関数を実行する前にget_dbを実行し、dbインスタンスを取得する 依存性注入
 
 
-def get_tasks(db: Session = Depends(get_db)):
+def get_tasks(task: Task, db: Session = Depends(get_db)):
     #  query()メソッドでデータを選択できる。all()メソッドで全てを選択する
     all_tasks = db.query(Task).all()
     print(all_tasks)
@@ -67,6 +67,22 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
     if particular_task is None:
         raise HTTPException(status_code=404, detail="Task not found")
     return particular_task
+
+
+# タスクの作成
+@app.post("/api/todo/tasks")
+# taskはTaskクラスのインスタンス
+def create_task(task: Task, db: Session = Depends(get_db)):
+    # データベースに保存するためのTaskモデルのインスタンスを作成
+    db_task = Task(
+        id=id.task, title=task.title, deadline=task.deadline, status_id=task.status_id
+    )
+    db.add(db_task)
+    db.commit()
+    # 最新のデータベースの内容をdb_taskオブジェクトに反映する
+    db.refresh(db_task)
+    print(db_task)
+    return db_task
 
 
 @app.exception_handler(StarletteHTTPException)
