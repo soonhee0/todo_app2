@@ -71,10 +71,10 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
 
 # タスクの作成
 @app.post("/api/todo/tasks")
-# taskはTaskクラスのインスタンス
+# リクエストボディを受け取り、 taskがpydanticモデルTaskのインスタンスとして割り当てられる
 def create_task(task: Task, db: Session = Depends(get_db)):
 
-    # データベースに保存するためのTaskモデルのインスタンスを作成
+    # データベースに保存するためのSQLAlchemyTaskモデルのインスタンスとしてdb_task を作成
     db_task = Task(
         id=id.task,
         title=task.title,
