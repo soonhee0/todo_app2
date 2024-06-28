@@ -70,15 +70,16 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
 
 # タスクの作成
 @app.post("/api/todo/tasks")
-# リクエストボディを受け取り、 引数taskとしてpydanticモデルのTaskインスタンスが割り当てられる
+# 受け取ったリクエストデータをpydanticモデルのTaskモデルに割り当てられ、task変数に変換
+# これにより、Taskモデルに従って、関数内でtask変数が扱えるようになる
 def create_task(task: Task, db: Session = Depends(get_db)):
 
-    db.add(Task)
+    db.add(task)
     db.commit()
-    # 最新のデータベースの内容をTaskインスタンスに反映する
-    db.refresh(Task)
-    print(Task)
-    return Task
+    # 最新のデータベースの内容をtask変数に反映する
+    db.refresh(task)
+    print(task)
+    return task
 
 
 @app.exception_handler(StarletteHTTPException)
