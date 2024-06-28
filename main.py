@@ -5,7 +5,6 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 from typing import List
-from settings import SessionLocal
 
 
 # ローカルモジュール
@@ -67,6 +66,20 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
     if particular_task is None:
         raise HTTPException(status_code=404, detail="Task not found")
     return particular_task
+
+
+# タスクの作成
+@app.post("/api/todo/tasks")
+# 受け取ったリクエストデータをpydanticモデルのTaskモデルに割り当てられ、task変数に変換
+# これにより、Taskモデルに従って、関数内でtask変数が扱えるようになる
+def create_task(task: Task, db: Session = Depends(get_db)):
+
+    db.add(task)
+    db.commit()
+    # 最新のデータベースの内容をtask変数に反映する
+    db.refresh(task)
+    print(task)
+    return task
 
 
 @app.exception_handler(StarletteHTTPException)
